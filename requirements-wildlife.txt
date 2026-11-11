@@ -1,0 +1,5 @@
+# Optional wildlife extras. MegaDetector is the recommended detector for
+# finding animals at a distance. SpeciesNet is a later drop-in classifier.
+-r requirements.txt
+PytorchWildlife>=1.2.0
+# speciesnet  # uncomment after you are ready to add species ID; it is heavy

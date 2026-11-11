@@ -1,0 +1,162 @@
+# Wildwatch default configuration.
+# CLI flags override these values. Paths are relative to the working directory
+# unless they are absolute.
+
+# Video source. Accepts:
+#   - a device index (0) or path (/dev/video0) for an HDMI capture dongle
+#   - a file path for offline testing
+#   - an RTMP, RTSP, UDP, HTTP, or HTTPS URL
+# Recommended Mini 3 live path after starting scripts/start-rtmp.sh:
+#   rtmp://127.0.0.1:1935/live/stream
+#   or rtsp://127.0.0.1:8554/live/stream
+source: samples/demo.mp4
+
+# gui      — OpenCV window on the laptop
+# browser  — FastAPI MJPEG dashboard (view in Chrome)
+# headless — no window, write annotated frames + event log (for tests / batch)
+mode: gui
+
+# yolo          — zero-setup default. COCO classes only (person, vehicle,
+#                 dog, horse, cow, bear, bird, ...). Does NOT know coyote,
+#                 whitetail, or feral hog. A coyote may be boxed as "dog".
+# megadetector  — recommended wildlife mode. Classes are animal / person /
+#                 vehicle. Requires: pip install -r requirements-wildlife.txt
+#                 Use this, then a classifier, for real species ID.
+detector: yolo
+
+# YOLO weights. Ultralytics downloads these on first run into its cache.
+# yolo11n.pt or yolov8n.pt are the CPU-friendly defaults.
+# Swap to yolo11s.pt / yolo11m.pt if you have a discrete GPU.
+# To use your own trained weights (e.g. coyote/deer/hog), set a .pt path here.
+model: yolo11n.pt
+
+megadetector:
+  # MDV6-yolov10-c is the compact 2.3M-param variant meant for CPU / laptops.
+  # Accuracy option if you have a GPU: MDV6-yolov10-e
+  version: MDV6-yolov10-c
+
+# Species classifier run on each MegaDetector (or YOLO-animal) crop.
+#   none        — animals are labeled "animal (unid.)". This is the default.
+#                 We will not invent coyote/deer/hog labels the model cannot produce.
+#   speciesnet  — Google SpeciesNet, if installed (pip install speciesnet).
+#   custom      — your own image classifier; see custom_classifier below.
+classifier: none
+
+custom_classifier:
+  # Path to an Ultralytics classify .pt, or a folder of weights you hook up
+  # in wildwatch/classifiers/custom.py. Leave empty until you have a model.
+  weights: ""
+  # Optional explicit label list. If empty, labels come from the model.
+  labels: []
+
+confidence: 0.35
+iou: 0.45
+imgsz: 640
+# Leave empty to auto-select: cuda if available, else cpu. Or set "cpu" / "cuda" / "0".
+device: ""
+
+# Process every (frame_skip + 1)th frame. Raise this on a CPU-only laptop
+# if the HUD stutters (the overlay still shows the latest live frame).
+frame_skip: 0
+
+# For file sources: loop the video (useful for demos) or exit at EOF.
+loop_file: false
+
+alert:
+  # Matched as case-insensitive substrings against the *actual* model label.
+  # With stock YOLO these will only fire for COCO names (e.g. "person", "dog",
+  # "bear"). With MegaDetector + no classifier, use "animal" to snapshot every
+  # animal box. After you add a species model, add coyote / deer / hog here.
+  species:
+    - coyote
+    - deer
+    - hog
+    - pig
+    - boar
+    - bear
+    - person
+    - animal
+  min_confidence: 0.45
+  beep: true
+  snapshot: true
+  # Minimum seconds between snapshots/beeps for the same label.
+  cooldown_seconds: 3.0
+
+paths:
+  captures: captures
+  events: captures/events.jsonl
+  events_csv: captures/events.csv
+  # Drawn geofences persist here (normalized 0-1 polygons). Not GPS.
+  zones: captures/zones.yaml
+
+server:
+  host: 0.0.0.0
+  port: 8080
+
+hud:
+  compass: true
+  reticle: true
+  trails: true
+  threat_list: true
+
+# Optional DJI SRT sidecar (recorded flights). Live Mini 3 RTMP does not
+# include telemetry in-band; leave this empty and the HUD will show "---"
+# rather than inventing coordinates. See README for the hook.
+telemetry:
+  srt_path: ""
+
+# Multi-object tracking. YOLO uses Ultralytics ByteTrack (or BoT-SORT) via
+# model.track. MegaDetector uses a simple IOU/centroid tracker. Persistent
+# track IDs, trails, dwell time, and motion vectors all come from this.
+tracking:
+  enabled: true
+  # auto | bytetrack | botsort | iou
+  backend: auto
+  max_age: 30
+  min_iou: 0.3
+  trail_length: 30
+
+# Heuristic pixel-space threat score, not a geospatial intercept.
+# class_weights apply only when the *active model* actually emits that label.
+# Stock YOLO will never score "coyote" / "hog" until you add a species model.
+threat:
+  class_weights:
+    person: 0.90
+    vehicle: 0.85
+    car: 0.85
+    truck: 0.85
+    bus: 0.85
+    motorcycle: 0.80
+    coyote: 0.90
+    hog: 0.85
+    pig: 0.85
+    boar: 0.85
+    bear: 0.90
+    dog: 0.55
+    deer: 0.40
+    animal: 0.50
+    "animal (unid.)": 0.50
+  weights:
+    class: 0.35
+    confidence: 0.15
+    proximity: 0.20   # box area / frame area, a closeness proxy
+    dwell: 0.15
+    approach: 0.15
+  proximity_area_ref: 0.12
+  dwell_ref_frames: 45
+  approach_min_px: 2.0
+  approach_confirm: 5
+  high: 0.70
+  medium: 0.40
+  approach_alerts: true
+  zone_alerts: true
+
+# Frame-space geofences. Coordinates are normalized 0-1 in the video frame
+# (not lat/lon — live Mini 3 RTMP has no telemetry). Draw more in the GUI
+# (click vertices, press Z to close) or on the browser dashboard.
+zones:
+  items: []
+  # Example:
+  # items:
+  #   - name: homestead
+  #     polygon: [[0.15, 0.20], [0.55, 0.20], [0.55, 0.70], [0.15, 0.70]]

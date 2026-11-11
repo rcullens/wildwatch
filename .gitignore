@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.python-version
+
+# Models and weights (downloaded at runtime)
+*.pt
+*.pth
+*.onnx
+*.engine
+*.bin
+*.safetensors
+weights/
+models/*.pt
+
+# Runtime output
+captures/
+events.jsonl
+events.csv
+*.log
+
+# MediaMTX binary and working files
+scripts/mediamtx
+scripts/mediamtx_*
+!scripts/mediamtx.yml
+*.mp4
+*.avi
+*.mkv
+*.mov
+samples/*
+!samples/.gitkeep
+!samples/*.yaml
+!samples/*.yml
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*~
+
+# Ultralytics training/predict output
+runs/

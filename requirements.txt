@@ -1,0 +1,10 @@
+# Core (zero-setup YOLO path). Install into a venv via setup.sh.
+ultralytics>=8.3.0
+lap>=0.5.12
+opencv-python>=4.10.0
+numpy>=1.26.0
+PyYAML>=6.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.12
+pillow>=10.0.0

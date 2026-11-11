@@ -1,0 +1,17 @@
+# Minimal MediaMTX config for DJI Mini 3 RTMP ingest.
+# DJI Fly publishes to rtmp://<laptop-lan-ip>:1935/live/stream
+# Wildwatch consumes rtmp://127.0.0.1:1935/live/stream
+#   or the auto-converted rtsp://127.0.0.1:8554/live/stream
+
+logLevel: info
+rtspAddress: :8554
+rtmpAddress: :1935
+hlsAddress: :8888
+webrtcAddress: :8889
+api: no
+
+paths:
+  live/stream:
+    source: publisher
+  all:
+    source: publisher

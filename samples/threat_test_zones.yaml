@@ -1,0 +1,9 @@
+# Frame-space geofence used by the threat-test clip (samples/threat_test.mp4).
+# Coordinates are normalized 0-1 in the video frame — not lat/lon.
+items:
+  - name: homestead
+    polygon:
+      - [0.45, 0.25]
+      - [0.95, 0.25]
+      - [0.95, 0.85]
+      - [0.45, 0.85]

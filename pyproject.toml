@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wildwatch"
+version = "0.1.0"
+description = "Real-time aerial awareness and wildlife identification from a drone video feed."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Roger Cullens"}]
+dependencies = [
+  "ultralytics>=8.3.0",
+  "lap>=0.5.12",
+  "opencv-python>=4.10.0",
+  "numpy>=1.26.0",
+  "PyYAML>=6.0",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "python-multipart>=0.0.12",
+  "pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+wildlife = ["PytorchWildlife>=1.2.0"]
+species = ["speciesnet"]
+
+[project.scripts]
+wildwatch = "wildwatch.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["wildwatch*"]
